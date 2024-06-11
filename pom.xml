@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>com.dataknocker</groupId>
     <artifactId>simple-flink</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
     <modules>
-        <module>flink-core</module>
+        <module>flink-runtime</module>
     </modules>
 
     <properties>
@@ -18,6 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <akka.version>2.5.21</akka.version>
         <scala.binary.version>2.11</scala.binary.version>
+        <slf4j.version>1.7.15</slf4j.version>
+        <log4j.version>2.12.1</log4j.version>
     </properties>
 
     <dependencyManagement>
@@ -33,6 +35,32 @@
                 <artifactId>akka-remote_${scala.binary.version}</artifactId>
                 <version>${akka.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.10.0</version>
+            </dependency>
+
+
         </dependencies>
     </dependencyManagement>
 

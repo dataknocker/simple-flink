@@ -16,7 +16,7 @@ public class AkkaRpcServiceUtils {
         private String address;
         private int port;
 
-        private String actorSystemName = "rpc";
+        private String actorSystemName = "flink";
 
         private AkkaRpcServiceBuilder() {
 
@@ -41,7 +41,7 @@ public class AkkaRpcServiceUtils {
             this.port = port;
             return this;
         }
-        public AkkaRpcService build(Function<ActorSystem, AkkaRpcService> constructor) {
+        public AkkaRpcService createAndStart(Function<ActorSystem, AkkaRpcService> constructor) {
             ActorSystem actorSystem = AkkaUtils.createActorSystem(actorSystemName, address, port);
             return constructor.apply(actorSystem);
         }

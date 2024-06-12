@@ -6,10 +6,15 @@ import com.dataknocker.runtime.rpc.RpcService;
 
 public class TaskManagerRunner {
     public static void main(String[] args) {
-
+        startTaskExecutor();
     }
 
-    public static RpcService createRpcService() {
-        return null;
+    public static void startTaskExecutor() {
+        RpcService rpcService = AkkaRpcServiceUtils.newLocalBuilder()
+                .withAddress("localhost")
+                .withPort(2552)
+                .createAndStart(AkkaRpcService::new);
+        TaskExecutor taskExecutor = new TaskExecutor(rpcService);
+
     }
 }

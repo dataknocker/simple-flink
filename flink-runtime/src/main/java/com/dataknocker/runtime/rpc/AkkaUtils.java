@@ -3,6 +3,7 @@ package com.dataknocker.runtime.rpc;
 import akka.actor.ActorSystem;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import java.util.HashMap;
@@ -10,7 +11,11 @@ import java.util.Map;
 
 public class AkkaUtils {
     public static ActorSystem createActorSystem(String actorSystemName, String hostname, int port) {
-        return ActorSystem.create(actorSystemName, getAkkaConfig(hostname, port));
+        if (StringUtils.isNotBlank(hostname)) {
+            return ActorSystem.create(actorSystemName, getAkkaConfig(hostname, port));
+        } else {
+            return ActorSystem.create(actorSystemName);
+        }
     }
 
     public static Config getAkkaConfig(String hostname, int port) {

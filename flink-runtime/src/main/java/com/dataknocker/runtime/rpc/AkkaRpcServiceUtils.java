@@ -45,6 +45,11 @@ public class AkkaRpcServiceUtils {
             ActorSystem actorSystem = AkkaUtils.createActorSystem(actorSystemName, address, port);
             return constructor.apply(actorSystem);
         }
+
+        public AkkaRpcService createAndStart() {
+            ActorSystem actorSystem = AkkaUtils.createActorSystem(actorSystemName, address, port);
+            return new AkkaRpcService(actorSystem);
+        }
     }
 
     public static AkkaRpcServiceBuilder newRemoteBuilder(String address, int port) {

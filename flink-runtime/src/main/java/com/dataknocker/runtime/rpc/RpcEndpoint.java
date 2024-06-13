@@ -1,10 +1,18 @@
 package com.dataknocker.runtime.rpc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * rpc主服务
+ */
 public abstract class RpcEndpoint implements RpcGateway{
 
-    private RpcService rpcService;
+    protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private RpcServer rpcServer;
+    protected RpcService rpcService;
+
+    protected RpcServer rpcServer;
     protected String endpointId;
 
     public RpcEndpoint(RpcService rpcService, String endpointId) {

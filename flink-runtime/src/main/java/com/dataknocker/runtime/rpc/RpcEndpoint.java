@@ -25,4 +25,12 @@ public abstract class RpcEndpoint implements RpcGateway{
         return endpointId;
     }
 
+    public String getAddress() {
+        return rpcServer.getAddress();
+    }
+
+    public String getHostName() {
+        return null;
+    }
+
 }

@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 /**
  * 1、用于启动supervisor(/rpc)以及用supervisor注册各endpoint rpc actor
  * 2、通过address连接目标服务，得到actorSelection。通过proxy调用目标服务接口时转成由actorSelection.tell(RpcInvocation)传给目标服务
+ * 3、做一些线程池调度
  */
 public class AkkaRpcService implements RpcService {
     private static final Logger LOG = LoggerFactory.getLogger(AkkaRpcService.class);
@@ -23,9 +24,12 @@ public class AkkaRpcService implements RpcService {
     private ActorSystem actorSystem;
     private Supervisor supervisor;
 
+    private ScheduledExecutorService executorService;
+
     public AkkaRpcService(ActorSystem actorSystem) {
         this.actorSystem = actorSystem;
         this.supervisor = Supervisor.create(this.actorSystem);
+        executorService = Executors.newScheduledThreadPool(3);
     }
 
     @Override
@@ -46,8 +50,19 @@ public class AkkaRpcService implements RpcService {
     public <C extends RpcEndpoint & RpcGateway> RpcServer startServer(C rpcEndpoint) {
         Supervisor.ActorRegistration registration = registerAkkaRpcActor(rpcEndpoint);
         ActorRef actorRef = registration.getActorRef();
-        LOG.info("Starting RPC endpoint for {} at {} ", rpcEndpoint.getClass().getName(), actorRef.path());
-        return new AkkaRpcServer(actorRef);
+        String address = AkkaUtils.getAkkaURL(actorSystem, actorRef);
+        LOG.info("Starting RPC endpoint for {} at {} ", rpcEndpoint.getClass().getName(), address);
+        return new AkkaRpcServer(actorRef, address);
+    }
+
+    @Override
+    public ScheduledExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    @Override
+    public Executor getExecutor() {
+        return actorSystem.dispatcher();
     }
 
     private <C extends RpcEndpoint & RpcGateway> Supervisor.ActorRegistration registerAkkaRpcActor(C rpcEndpoint) {

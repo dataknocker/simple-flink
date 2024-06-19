@@ -13,7 +13,7 @@ public class JobManagerRunner {
         JobMaster jobMaster = new JobMaster(rpcService);
         Random random = new Random();
         while(true) {
-            jobMaster.submitTask(random.nextInt(1000), "taskmanager_0");
+            jobMaster.submitTask(random.nextInt(1000));
             Thread.sleep(5000);
         }
 

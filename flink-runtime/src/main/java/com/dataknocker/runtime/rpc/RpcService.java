@@ -1,6 +1,9 @@
 package com.dataknocker.runtime.rpc;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 public interface RpcService {
     /**
@@ -13,4 +16,9 @@ public interface RpcService {
     <C extends RpcGateway> CompletableFuture<C> connect(String address, Class<C> clazz);
 
     <C extends RpcEndpoint & RpcGateway> RpcServer startServer(C rpcEndpoint);
+
+    //TODO flink用的是ActorSystem.schedule相关方法，需要实现
+    ScheduledExecutorService getExecutorService();
+
+    Executor getExecutor();
 }

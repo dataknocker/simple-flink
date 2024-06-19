@@ -1,6 +1,9 @@
 package com.dataknocker.runtime.rpc;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.Address;
+import akka.actor.ExtensionId;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -35,5 +38,16 @@ public class AkkaUtils {
                 "}";
         StringSubstitutor configString = new StringSubstitutor(valueMap);
         return ConfigFactory.parseString(configString.replace(configTpl));
+    }
+
+    /**
+     * 获得actorRef的全路径
+     * @param system
+     * @param actorRef
+     * @return
+     */
+    public static String getAkkaURL(ActorSystem system, ActorRef actorRef) {
+        Address systemAddress = system.provider().getDefaultAddress();
+        return actorRef.path().toStringWithAddress(systemAddress);
     }
 }

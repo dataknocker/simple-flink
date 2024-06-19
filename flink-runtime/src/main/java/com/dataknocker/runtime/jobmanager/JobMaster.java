@@ -15,14 +15,14 @@ public class JobMaster extends RpcEndpoint implements JobMasterGateway {
     }
 
     @Override
-    public boolean registerTaskExecutor(String executorId, String executorAddress) {
+    public boolean registerTaskManager(String executorAddress) {
         rpcService.connect(executorAddress, TaskExecutorGateway.class)
                 .handle((gateway, throwable) -> {
                     if (throwable != null) {
-                        System.out.println(throwable);
+                        logger.error("Register TaskManager address {} error.", executorAddress, throwable);
                         return null;
                     }
-                    executorGatewayMap.put(executorId, gateway);
+                    executorGatewayMap.put(executorAddress, gateway);
                     logger.info("Success register taskmanager: {}.", executorAddress);
                     return gateway;
                 });
@@ -30,19 +30,9 @@ public class JobMaster extends RpcEndpoint implements JobMasterGateway {
         return true;
     }
 
-    @Override
-    public String getAddress() {
-        return null;
-    }
-
-    @Override
-    public String getHostName() {
-        return null;
-    }
-
-    public void submitTask(int taskId, String endpointId) {
-        if(executorGatewayMap.containsKey(endpointId)) {
-            executorGatewayMap.get(endpointId).submitTask(taskId);
+    public void submitTask(int taskId) {
+        if(!executorGatewayMap.isEmpty()) {
+            executorGatewayMap.values().iterator().next().submitTask(taskId, "com.dataknocker.runtime.tasks.StreamTask");
         }
     }
 }

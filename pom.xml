@@ -10,6 +10,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>flink-runtime</module>
+        <module>flink-streaming</module>
+        <module>flink-client</module>
     </modules>
 
     <properties>

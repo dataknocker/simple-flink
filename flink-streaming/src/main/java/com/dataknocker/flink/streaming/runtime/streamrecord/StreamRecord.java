@@ -27,6 +27,17 @@ public class StreamRecord<T> extends StreamElement{
         return value;
     }
 
+    /**
+     * 替换值，达到对象复用的效果
+     * @param value
+     * @return
+     * @param <X>
+     */
+    public <X> StreamRecord<X> replace(X value) {
+        this.value = (T)value;
+        return (StreamRecord<X>) this;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }

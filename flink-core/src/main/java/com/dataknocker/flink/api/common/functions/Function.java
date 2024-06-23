@@ -1,4 +1,4 @@
-package com.dataknocker.flink.streaming.api.common;
+package com.dataknocker.flink.api.common.functions;
 
 import java.io.Serializable;
 

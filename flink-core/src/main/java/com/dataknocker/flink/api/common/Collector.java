@@ -1,4 +1,4 @@
-package com.dataknocker.flink.streaming.api.common;
+package com.dataknocker.flink.api.common;
 
 public interface Collector<T> {
 

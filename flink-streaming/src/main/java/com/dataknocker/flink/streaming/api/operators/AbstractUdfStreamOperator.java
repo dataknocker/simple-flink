@@ -1,7 +1,7 @@
 package com.dataknocker.flink.streaming.api.operators;
 
 
-import com.dataknocker.flink.streaming.api.common.Function;
+import com.dataknocker.flink.api.common.functions.Function;
 
 /**
  * 带用户自定义函数的流操作符
@@ -19,5 +19,14 @@ public abstract class AbstractUdfStreamOperator<OUT, F extends Function> extends
 
     public F getUserFunction() {
         return userFunction;
+    }
+
+    @Override
+    public void open() throws Exception {
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

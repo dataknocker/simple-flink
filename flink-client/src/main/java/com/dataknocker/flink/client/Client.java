@@ -1,34 +1,46 @@
 package com.dataknocker.flink.client;
 
-import com.dataknocker.flink.configuration.Configuration;
-import com.dataknocker.flink.runtime.jobmanager.JobManagerRunner;
-import com.dataknocker.flink.runtime.jobmanager.JobMaster;
-import com.dataknocker.flink.streaming.api.common.Collector;
-import com.dataknocker.flink.streaming.api.common.FlatMapFunction;
-import com.dataknocker.flink.streaming.api.operators.OneInputStreamOperator;
-import com.dataknocker.flink.streaming.api.operators.SimpleStreamOperatorFactory;
-import com.dataknocker.flink.streaming.api.operators.StreamFlatMap;
-import com.dataknocker.flink.streaming.api.operators.StreamOperatorFactory;
-import com.dataknocker.flink.util.InstantiationUtil;
+import com.dataknocker.flink.api.common.Collector;
+import com.dataknocker.flink.api.common.functions.FlatMapFunction;
+import com.dataknocker.flink.streaming.api.datastream.DataStream;
+import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.dataknocker.flink.streaming.api.functions.source.SourceFunction;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Client {
 
     public static void main(String[] args) throws Exception {
-        Configuration configuration = new Configuration();
-        configuration.setString("invokableClassName", "com.dataknocker.flink.streaming.runtime.tasks.TestOneInputStreamTask");
-        FlatMapFunction<String, String> flatMapper = new FlatMapFunction<String, String>() {
+        StreamExecutionEnvironment env = new StreamExecutionEnvironment();
+        DataStream<String> dataStream = env.addSource(new SourceFunction<String>() {
+            private boolean stop;
+
+            private List<String> data = Arrays.asList("hello", "world");
+
+            private int index = 0;
 
             @Override
-            public void flatMap(String value, Collector<String> out) throws Exception {
-                System.out.println("process: " + value);
-                out.collect(value + "_flatmap");
+            public void run(SourceContext<String> ctx) throws Exception {
+                while (!stop && index <= data.size()) {
+                    ctx.collect(data.get(index));
+                    index++;
+                }
             }
-        };
-        OneInputStreamOperator<String, String> operator = new StreamFlatMap<>(flatMapper);
-        StreamOperatorFactory<String> operatorFactory =  SimpleStreamOperatorFactory.of(operator);
-        configuration.putBytes("operatorFactory", InstantiationUtil.serializeObject(operatorFactory, Client.class.getClassLoader()));
-        JobMaster jobMaster = JobManagerRunner.startJobManager();
-        Thread.sleep(10000);
-        jobMaster.submitTask(configuration);
+
+            @Override
+            public void cancel() {
+                stop = true;
+            }
+        });
+        dataStream.flatMap(new FlatMapFunction<String, String>() {
+            @Override
+            public void flatMap(String value, Collector<String> out) throws Exception {
+                for (int i = 0; i < value.length(); i++) {
+                    out.collect(value.substring(i, i + 1));
+                }
+            }
+        }).filter(t -> "h".compareToIgnoreCase(t) >= 0);
+        env.execute("test");
     }
 }

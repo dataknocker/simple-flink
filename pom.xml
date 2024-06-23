@@ -12,6 +12,7 @@
         <module>flink-runtime</module>
         <module>flink-streaming</module>
         <module>flink-client</module>
+        <module>flink-core</module>
     </modules>
 
     <properties>

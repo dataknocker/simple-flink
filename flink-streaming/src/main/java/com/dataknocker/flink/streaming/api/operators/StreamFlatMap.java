@@ -1,6 +1,6 @@
 package com.dataknocker.flink.streaming.api.operators;
 
-import com.dataknocker.flink.streaming.api.common.FlatMapFunction;
+import com.dataknocker.flink.api.common.functions.FlatMapFunction;
 import com.dataknocker.flink.streaming.runtime.streamrecord.StreamRecord;
 
 /**
@@ -9,7 +9,7 @@ import com.dataknocker.flink.streaming.runtime.streamrecord.StreamRecord;
  * @param <OUT>
  */
 public class StreamFlatMap<IN, OUT> extends AbstractUdfStreamOperator<OUT, FlatMapFunction<IN, OUT>> implements OneInputStreamOperator<IN, OUT>{
-
+    private static final long serialVersionUID = 1L;
     private transient Output<OUT> collector;
     public StreamFlatMap(FlatMapFunction<IN, OUT> flatMapper) {
         super(flatMapper);
@@ -23,7 +23,7 @@ public class StreamFlatMap<IN, OUT> extends AbstractUdfStreamOperator<OUT, FlatM
 
     @Override
     public void open() throws Exception {
-        collector = new SimpleOutput<>();
+        collector = new SimpleOutput<>(output);
     }
 
     @Override

@@ -3,7 +3,9 @@ package com.dataknocker.flink.streaming.runtime.tasks;
 import com.dataknocker.flink.runtime.execution.Environment;
 import com.dataknocker.flink.runtime.jobgraph.tasks.AbstractInvokable;
 import com.dataknocker.flink.streaming.api.graph.StreamConfig;
+import com.dataknocker.flink.streaming.api.operators.Output;
 import com.dataknocker.flink.streaming.api.operators.StreamOperator;
+import com.dataknocker.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,8 @@ public class StreamTask<OUT, OP extends StreamOperator<OUT>> extends AbstractInv
     public StreamConfig getConfiguration() {
         return configuration;
     }
+
+    public Output<StreamRecord<OUT>> getOutput() {return null;}
 
 
 }

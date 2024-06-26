@@ -22,6 +22,12 @@ public class InstantiationUtil {
         return deserializeObject(bytes, classLoader);
     }
 
+    public static void writeObjectToConfig(Configuration config, String key, Object object)
+            throws IOException {
+        byte[] bytes = serializeObject(object);
+        config.setBytes(key, bytes);
+    }
+
     public static <T> T deserializeObject(byte[] bytes, ClassLoader classLoader)
             throws IOException, ClassNotFoundException {
         final ClassLoader old = Thread.currentThread().getContextClassLoader();
@@ -37,7 +43,7 @@ public class InstantiationUtil {
         }
     }
 
-    public static byte[] serializeObject(Object object, ClassLoader classLoader) throws IOException {
+    public static byte[] serializeObject(Object object) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(object);

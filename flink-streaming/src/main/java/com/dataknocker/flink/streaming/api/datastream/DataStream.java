@@ -2,12 +2,10 @@ package com.dataknocker.flink.streaming.api.datastream;
 
 import com.dataknocker.flink.api.common.functions.FilterFunction;
 import com.dataknocker.flink.api.common.functions.FlatMapFunction;
+import com.dataknocker.flink.api.common.functions.MapFunction;
 import com.dataknocker.flink.api.dag.Transformation;
 import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment;
-import com.dataknocker.flink.streaming.api.operators.SimpleStreamOperatorFactory;
-import com.dataknocker.flink.streaming.api.operators.StreamFilter;
-import com.dataknocker.flink.streaming.api.operators.StreamFlatMap;
-import com.dataknocker.flink.streaming.api.operators.StreamOperatorFactory;
+import com.dataknocker.flink.streaming.api.operators.*;
 import com.dataknocker.flink.streaming.api.transformations.OneInputTransformation;
 
 /**
@@ -30,6 +28,10 @@ public class DataStream<T> {
 
     public DataStream<T> filter(FilterFunction<T> filterFunction) {
         return doTransform("Filter", SimpleStreamOperatorFactory.of(new StreamFilter<>(filterFunction)));
+    }
+
+    public <R> DataStream<R> map(MapFunction<T, R> mapFunction) {
+        return doTransform("Map", SimpleStreamOperatorFactory.of(new StreamMap<>(mapFunction)));
     }
 
     /**

@@ -8,13 +8,17 @@ import com.dataknocker.flink.streaming.api.operators.StreamOperatorFactory;
 import java.util.Collections;
 import java.util.List;
 
-public class SourceTransformation<T> extends Transformation<T> {
+/**
+ * 无InputSource的Source。如果是env.fromSource(source)的则走SourceTransformation
+ * @param <T>
+ */
+public class LegacySourceTransformation<T> extends Transformation<T> {
     private StreamOperatorFactory<T> operatorFactory;
-    public SourceTransformation(String name, StreamOperator<T> operator) {
+    public LegacySourceTransformation(String name, StreamOperator<T> operator) {
         this(name, SimpleStreamOperatorFactory.of(operator));
     }
 
-    public SourceTransformation(String name, StreamOperatorFactory<T> operatorFactory) {
+    public LegacySourceTransformation(String name, StreamOperatorFactory<T> operatorFactory) {
         super(name);
         this.operatorFactory = operatorFactory;
     }

@@ -1,6 +1,7 @@
 package com.dataknocker.flink.streaming.api.graph;
 
 import com.dataknocker.flink.api.dag.Pipeline;
+import com.dataknocker.flink.runtime.jobgraph.JobGraph;
 import com.dataknocker.flink.runtime.jobgraph.tasks.AbstractInvokable;
 import com.dataknocker.flink.streaming.api.operators.StreamOperatorFactory;
 import com.dataknocker.flink.streaming.runtime.tasks.OneInputStreamTask;
@@ -43,6 +44,11 @@ public class StreamGraph implements Pipeline {
         sources.add(vertexId);
     }
 
+    public <OUT> void addLegacySource(int vertexId, String sourceName, StreamOperatorFactory<OUT> operatorFactory) {
+        addOperator(vertexId, sourceName, operatorFactory);
+        sources.add(vertexId);
+    }
+
     public <IN, OUT> void addOperator(int vertexId, String operatorName, StreamOperatorFactory<OUT> operatorFactory) {
         //根据operatorFactory.isStreamSource()来决定是sourceTask还是普通的Task
         addNode(vertexId, operatorName, operatorFactory, operatorFactory.isStreamSource() ? SourceStreamTask.class : OneInputStreamTask.class);
@@ -68,6 +74,10 @@ public class StreamGraph implements Pipeline {
         targetNode.addInEdge(edge);
     }
 
+    public JobGraph createJobGraph() {
+        return StreamJobGraphGenerator.createJobGraph(this);
+    }
+
     public String getJobName() {
         return jobName;
     }
@@ -78,5 +88,13 @@ public class StreamGraph implements Pipeline {
 
     public StreamNode getStreamNode(int vertexId) {
         return streamNodes.get(vertexId);
+    }
+
+    public Set<Integer> getSources() {
+        return sources;
+    }
+
+    public Set<Integer> getSinks() {
+        return sinks;
     }
 }

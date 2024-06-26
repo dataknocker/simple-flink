@@ -29,6 +29,21 @@ public class Configuration implements Serializable {
         configData.put(key, value);
     }
 
+
+    public Integer getInteger(String key, Integer defaultValue) {
+        return getRawValue(key).map(o -> (Integer)o).orElse(defaultValue);
+    }
+    public void setInteger(String key, Integer value) {
+        configData.put(key, value);
+    }
+
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        return getRawValue(key).map(o -> (Boolean)o).orElse(defaultValue);
+    }
+    public void setBoolean(String key, Boolean value) {
+        configData.put(key, value);
+    }
+
     public byte[] getBytes(String key, byte[] defaultValue) {
         return getRawValue(key).map(
                 o -> {
@@ -43,7 +58,7 @@ public class Configuration implements Serializable {
         ).orElse(defaultValue);
     }
 
-    public void putBytes(String key, byte[] value) {
+    public void setBytes(String key, byte[] value) {
         configData.put(key, value);
     }
 }

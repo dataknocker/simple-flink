@@ -31,8 +31,7 @@ public class JobMaster extends RpcEndpoint implements JobMasterGateway {
         return true;
     }
 
-    public void submitTask(Configuration configuration) {
-        int taskId = 1;
+    public void submitTask(int taskId, Configuration configuration) {
         if(!executorGatewayMap.isEmpty()) {
             System.out.println("submit task");
             executorGatewayMap.values().iterator().next().submitTask(taskId, configuration);

@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * 专门用于处理有一个输入的算子的转换器
+ * 在生成StreamGraph的时候，会通过其input来建立edge
  *
  * @param <IN>
  * @param <OUT>

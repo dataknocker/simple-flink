@@ -2,6 +2,7 @@ package com.dataknocker.flink.client;
 
 import com.dataknocker.flink.api.common.Collector;
 import com.dataknocker.flink.api.common.functions.FlatMapFunction;
+import com.dataknocker.flink.api.common.functions.MapFunction;
 import com.dataknocker.flink.streaming.api.datastream.DataStream;
 import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment;
 import com.dataknocker.flink.streaming.api.functions.source.SourceFunction;
@@ -22,7 +23,7 @@ public class Client {
 
             @Override
             public void run(SourceContext<String> ctx) throws Exception {
-                while (!stop && index <= data.size()) {
+                while (!stop && index < data.size()) {
                     ctx.collect(data.get(index));
                     index++;
                 }
@@ -40,7 +41,13 @@ public class Client {
                     out.collect(value.substring(i, i + 1));
                 }
             }
-        }).filter(t -> "h".compareToIgnoreCase(t) >= 0);
+        }).filter(t -> "h".compareToIgnoreCase(t) >= 0)
+                .map(new MapFunction<String, String>() {
+                    @Override
+                    public void map(String value, Collector<String> out) throws Exception {
+                        out.collect(value.toUpperCase());
+                    }
+                }) ;
         env.execute("test");
     }
 }

@@ -52,6 +52,18 @@ public class StreamNode {
         return outEdges;
     }
 
+    public StreamOperatorFactory<?> getOperatorFactory() {
+        return operatorFactory;
+    }
+
+    public Class<? extends AbstractInvokable> getVertexClass() {
+        return vertexClass;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
     public String toString() {
         return operatorName + "-" + id;
     }

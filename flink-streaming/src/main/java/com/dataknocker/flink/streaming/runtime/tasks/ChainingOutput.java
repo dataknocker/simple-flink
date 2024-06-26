@@ -12,17 +12,14 @@ public class ChainingOutput<T> implements Output<StreamRecord<T>> {
 
     private Input<T> input;
 
-    private Output<StreamRecord<T>> output;
 
-    public ChainingOutput(Input<T> input, Output<StreamRecord<T>> output) {
+    public ChainingOutput(Input<T> input) {
         this.input = input;
-        this.output = output;
     }
     @Override
     public void collect(StreamRecord<T> record) {
         try {
             input.processElement(record);
-            output.collect(record);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,7 @@
 package com.dataknocker.flink.streaming.api.graph;
 
 import com.dataknocker.flink.api.dag.Transformation;
+import com.dataknocker.flink.streaming.api.transformations.LegacySinkTransformation;
 import com.dataknocker.flink.streaming.api.transformations.OneInputTransformation;
 import com.dataknocker.flink.streaming.api.transformations.LegacySourceTransformation;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class StreamGraphGenerator {
         Map<Class<? extends Transformation>, TransformationTranslator<?, ? extends Transformation<?>>> tmp = new HashMap<>();
         tmp.put(OneInputTransformation.class, new OneInputTransformationTranslator<>());
         tmp.put(LegacySourceTransformation.class, new LegacySourceTransformationTranslator<>());
+        tmp.put(LegacySinkTransformation.class, new LegacySinkTransformationTranslator<>());
         translatorMap = Collections.unmodifiableMap(tmp);
     }
 

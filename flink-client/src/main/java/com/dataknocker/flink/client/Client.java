@@ -5,6 +5,7 @@ import com.dataknocker.flink.api.common.functions.FlatMapFunction;
 import com.dataknocker.flink.api.common.functions.MapFunction;
 import com.dataknocker.flink.streaming.api.datastream.DataStream;
 import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.dataknocker.flink.streaming.api.functions.sink.SinkFunction;
 import com.dataknocker.flink.streaming.api.functions.source.SourceFunction;
 
 import java.util.Arrays;
@@ -47,7 +48,13 @@ public class Client {
                     public void map(String value, Collector<String> out) throws Exception {
                         out.collect(value.toUpperCase());
                     }
-                }) ;
+                }).addSink(new SinkFunction<String>() {
+
+                    @Override
+                    public void invoke(String value) throws Exception {
+                        System.out.println("Sink value: " + value);
+                    }
+                });
         env.execute("test");
     }
 }

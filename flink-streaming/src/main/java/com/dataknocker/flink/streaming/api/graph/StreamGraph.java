@@ -49,6 +49,11 @@ public class StreamGraph implements Pipeline {
         sources.add(vertexId);
     }
 
+    public <T> void addLegacySink(int vertexId, String sinkName, StreamOperatorFactory<T> operatorFactory) {
+        addOperator(vertexId, sinkName, operatorFactory);
+        sinks.add(vertexId);
+    }
+
     public <IN, OUT> void addOperator(int vertexId, String operatorName, StreamOperatorFactory<OUT> operatorFactory) {
         //根据operatorFactory.isStreamSource()来决定是sourceTask还是普通的Task
         addNode(vertexId, operatorName, operatorFactory, operatorFactory.isStreamSource() ? SourceStreamTask.class : OneInputStreamTask.class);

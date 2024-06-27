@@ -5,6 +5,7 @@ import com.dataknocker.flink.api.common.functions.FlatMapFunction;
 import com.dataknocker.flink.api.common.functions.MapFunction;
 import com.dataknocker.flink.api.dag.Transformation;
 import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.dataknocker.flink.streaming.api.functions.sink.SinkFunction;
 import com.dataknocker.flink.streaming.api.operators.*;
 import com.dataknocker.flink.streaming.api.transformations.OneInputTransformation;
 
@@ -45,6 +46,12 @@ public class DataStream<T> {
         OneInputTransformation<T, R> returnTransform = new OneInputTransformation<>(operatorName, this.transformation, operatorFactory);
         environment.addOperator(returnTransform);
         return new SingleOutputDataStream<>(environment, returnTransform);
+    }
+
+    public SinkDataStream<T> addSink(SinkFunction<T> sinkFunction) {
+        SinkDataStream<T> sink = new SinkDataStream(this, new StreamSink<>(sinkFunction));
+        environment.addOperator(sink.getTransformation());
+        return sink;
     }
 
     public Transformation<T> getTransformation() {

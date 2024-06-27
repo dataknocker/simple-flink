@@ -53,18 +53,19 @@ public class OperatorChain<OUT, OP extends StreamOperator<OUT>> {
         }
 
         if (chainableOutEdges.isEmpty()) {
-            //TODO 先写死叶子节点的output
-            return new Output<StreamRecord<T>>() {
-                @Override
-                public void collect(StreamRecord<T> record) {
-                    System.out.println("final collect record:" + record.getValue());
-                }
-
-                @Override
-                public void close() {
-
-                }
-            };
+            //TODO 这个应该是sink,无output
+//            return new Output<StreamRecord<T>>() {
+//                @Override
+//                public void collect(StreamRecord<T> record) {
+//                    System.out.println("final collect record:" + record.getValue());
+//                }
+//
+//                @Override
+//                public void close() {
+//
+//                }
+//            };
+            return null;
 
         }
         //TODO 多个输出的暂不处理

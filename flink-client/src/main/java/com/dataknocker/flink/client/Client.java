@@ -43,6 +43,7 @@ public class Client {
                 }
             }
         }).filter(t -> "h".compareToIgnoreCase(t) >= 0)
+                .rebalance()
                 .map(new MapFunction<String, String>() {
                     @Override
                     public void map(String value, Collector<String> out) throws Exception {

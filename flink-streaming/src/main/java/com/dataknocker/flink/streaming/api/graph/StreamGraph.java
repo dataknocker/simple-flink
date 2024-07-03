@@ -4,8 +4,10 @@ import com.dataknocker.flink.api.dag.Pipeline;
 import com.dataknocker.flink.runtime.jobgraph.JobGraph;
 import com.dataknocker.flink.runtime.jobgraph.tasks.AbstractInvokable;
 import com.dataknocker.flink.streaming.api.operators.StreamOperatorFactory;
+import com.dataknocker.flink.streaming.runtime.partitioner.StreamPartitioner;
 import com.dataknocker.flink.streaming.runtime.tasks.OneInputStreamTask;
 import com.dataknocker.flink.streaming.runtime.tasks.SourceStreamTask;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,8 @@ public class StreamGraph implements Pipeline {
     private String jobName;
 
     private Map<Integer, StreamNode> streamNodes;
+
+    private Map<Integer, Pair<Integer, StreamPartitioner<?>>> virutalPartitonNodes = new HashMap<>();
 
     private Set<Integer> sources;
 
@@ -64,7 +68,7 @@ public class StreamGraph implements Pipeline {
     }
 
     private void addNode(int vertexId, String operatorName, StreamOperatorFactory<?> operatorFactory, Class<? extends AbstractInvokable> invokableClass) {
-        if(streamNodes.containsKey(vertexId)) {
+        if (streamNodes.containsKey(vertexId)) {
             throw new RuntimeException("Duplicate vertexId " + vertexId);
         }
         StreamNode node = new StreamNode(vertexId, operatorName, operatorFactory, invokableClass);
@@ -72,12 +76,21 @@ public class StreamGraph implements Pipeline {
     }
 
     public void addEdge(int sourceId, int targetId) {
-        StreamNode sourceNode = getStreamNode(sourceId);
+        int realSourceId = sourceId;
+        StreamPartitioner<?> partitioner = null;
+        //如果是虚拟分区节点，partition, 则将target和虚拟节点的input相连起来
+        if (virutalPartitonNodes.containsKey(sourceId)) {
+            Pair<Integer, StreamPartitioner<?>> pair = virutalPartitonNodes.get(sourceId);
+            realSourceId = pair.getLeft();
+            partitioner = pair.getRight();
+        }
+        StreamNode sourceNode = getStreamNode(realSourceId);
         StreamNode targetNode = getStreamNode(targetId);
-        StreamEdge edge = new StreamEdge(sourceNode, targetNode);
+        StreamEdge edge = new StreamEdge(sourceNode, targetNode, partitioner);
         sourceNode.addOutEdge(edge);
         targetNode.addInEdge(edge);
     }
+
 
     public JobGraph createJobGraph() {
         return StreamJobGraphGenerator.createJobGraph(this);
@@ -101,5 +114,9 @@ public class StreamGraph implements Pipeline {
 
     public Set<Integer> getSinks() {
         return sinks;
+    }
+
+    public void addVirtualPartitionNode(int vertexId, int sourceId, StreamPartitioner<?> partitioner) {
+        virutalPartitonNodes.put(vertexId, Pair.of(sourceId, partitioner));
     }
 }

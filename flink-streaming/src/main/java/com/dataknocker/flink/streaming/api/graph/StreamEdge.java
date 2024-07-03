@@ -1,5 +1,7 @@
 package com.dataknocker.flink.streaming.api.graph;
 
+import com.dataknocker.flink.streaming.runtime.partitioner.StreamPartitioner;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,10 +14,17 @@ public class StreamEdge implements Serializable {
     private int sourceId;
     private int targetId;
 
+    private StreamPartitioner<?> partitioner;
+
     public StreamEdge(StreamNode sourceVertex, StreamNode targetVertex) {
+        this(sourceVertex, targetVertex, null);
+    }
+
+    public StreamEdge(StreamNode sourceVertex, StreamNode targetVertex, StreamPartitioner<?> partitioner) {
         this.sourceId = sourceVertex.getId();
         this.targetId = targetVertex.getId();
         this.edgeId = sourceVertex + "_" + targetVertex;
+        this.partitioner = partitioner;
     }
 
     public int getSourceId() {
@@ -28,6 +37,10 @@ public class StreamEdge implements Serializable {
 
     public String getEdgeId() {
         return edgeId;
+    }
+
+    public StreamPartitioner<?> getPartitioner() {
+        return partitioner;
     }
 
     public int hashCode() {

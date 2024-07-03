@@ -42,4 +42,15 @@ public abstract class Transformation<T> {
     }
 
     public abstract List<Transformation<?>> getInputs();
+
+    public int hashCode() {
+        return id;
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof Transformation) {
+            return id == ((Transformation<?>) obj).getId();
+        }
+        return false;
+    }
 }

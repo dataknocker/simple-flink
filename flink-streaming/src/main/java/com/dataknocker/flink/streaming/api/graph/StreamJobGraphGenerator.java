@@ -1,8 +1,11 @@
 package com.dataknocker.flink.streaming.api.graph;
 
 import com.dataknocker.flink.configuration.Configuration;
+import com.dataknocker.flink.runtime.jobgraph.IntermediateDataset;
+import com.dataknocker.flink.runtime.jobgraph.JobEdge;
 import com.dataknocker.flink.runtime.jobgraph.JobGraph;
 import com.dataknocker.flink.runtime.jobgraph.JobVertex;
+import com.dataknocker.flink.streaming.runtime.partitioner.ForwardPartitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,17 +81,26 @@ public class StreamJobGraphGenerator {
                     nonChainableOutputs.add(edge);
                 }
             });
-            //TODO transitiveOutEdges是用于非chain中的连接，目前这里都是chain的，所以其为空
+            //transitiveOutEdges是用于非chain中的连接，目前这里都是chain的，所以其为空
             //这里进行递归，主要进行子节点的streamconfig配置
-            chainableOutputs.forEach(edge -> transitiveOutEdges.addAll(createChain(edge.getTargetId(), chainIndex + 1, info, chainEntryPoints)));
-            //TODO 非chain的暂不实现
+            chainableOutputs.forEach(edge -> transitiveOutEdges.addAll(
+                    createChain(edge.getTargetId(), chainIndex + 1, info, chainEntryPoints)));
+            //新chain，transitiveOutEdges是用于非chain中的连接，
+            nonChainableOutputs.forEach(edge -> {
+                transitiveOutEdges.add(edge);
+                createChain(edge.getTargetId(), 1, info.newChainInfo(edge.getTargetId()), chainEntryPoints);
+            });
+
             //起点的节点用来生成JobVertex, 一个JobVertex对应一个chain
             //递归时start的config是最后才设置。这里非start节点的config已经都设置好了。
             StreamConfig streamConfig = currentNodeId.equals(startNodeId)
                     ? createJobVertex(startNodeId, info, streamGraph)
                     : new StreamConfig(new Configuration());
             setVertexNodeConfig(currentNodeId, streamConfig, chainIndex, info, chainableOutputs, nonChainableOutputs);
-            //TODO 这个目前还没用
+            //jobvertex进行jobedge连接
+            if(startNodeId.equals(currentNodeId)) {
+                transitiveOutEdges.forEach(edge -> connect(startNodeId, edge));
+            }
             return transitiveOutEdges;
         } else {
             return Collections.emptyList();
@@ -136,6 +148,7 @@ public class StreamJobGraphGenerator {
 
     /**
      * chain起点作为jobVertex，返回的是其StreamConfig
+     *
      * @param streamNodeId
      * @param info
      * @param streamGraph
@@ -150,6 +163,17 @@ public class StreamJobGraphGenerator {
         jobGraph.addVertex(jobVertex);
         //返回config后，外面对config的设置都会间接操作jobVertex中的Configuration,达到设置jobVertex的配置的目的
         return new StreamConfig(jobVertex.getConfiguration());
+    }
+
+    /**
+     * 两个JobVertex进行相连
+     * @param headChain
+     * @param edge
+     */
+    public void connect(int headChain, StreamEdge edge) {
+        JobVertex upStreamVertex = jobVertices.get(headChain);
+        JobVertex downStreamVertex = jobVertices.get(edge.getTargetId());
+        downStreamVertex.connectNewDataSetAsInput(upStreamVertex);
     }
 
     /**
@@ -174,7 +198,7 @@ public class StreamJobGraphGenerator {
     public static boolean isChainableInput(StreamEdge streamEdge, StreamGraph streamGraph) {
         StreamNode upStreamNode = streamGraph.getStreamNode(streamEdge.getSourceId());
         StreamNode downStreamNode = streamGraph.getStreamNode(streamEdge.getTargetId());
-        return true;
+        return streamEdge.getPartitioner() == null || streamEdge.getPartitioner() instanceof ForwardPartitioner;
     }
 
     public Map<Integer, OperatorChainInfo> buildChainedInputsAndGetHeadInputs() {
@@ -198,6 +222,10 @@ public class StreamJobGraphGenerator {
             this.startNodeId = startNodeId;
             this.chainedSources = chainedSources;
             this.streamGraph = streamGraph;
+        }
+
+        public OperatorChainInfo newChainInfo(Integer startNodeId) {
+            return new OperatorChainInfo(startNodeId, chainedSources, streamGraph);
         }
 
         public Integer getStartNodeId() {

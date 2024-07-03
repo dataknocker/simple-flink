@@ -4,13 +4,11 @@ import com.dataknocker.flink.api.dag.Transformation;
 import com.dataknocker.flink.streaming.api.transformations.LegacySinkTransformation;
 import com.dataknocker.flink.streaming.api.transformations.OneInputTransformation;
 import com.dataknocker.flink.streaming.api.transformations.LegacySourceTransformation;
+import com.dataknocker.flink.streaming.api.transformations.PartitionTransformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironment.DEFAULT_JOB_NAME;
 
@@ -29,6 +27,7 @@ public class StreamGraphGenerator {
         tmp.put(OneInputTransformation.class, new OneInputTransformationTranslator<>());
         tmp.put(LegacySourceTransformation.class, new LegacySourceTransformationTranslator<>());
         tmp.put(LegacySinkTransformation.class, new LegacySinkTransformationTranslator<>());
+        tmp.put(PartitionTransformation.class, new PartitionTransformationTranslator<>());
         translatorMap = Collections.unmodifiableMap(tmp);
     }
 
@@ -37,6 +36,8 @@ public class StreamGraphGenerator {
     private StreamGraph streamGraph;
 
     private List<Transformation<?>> transformations;
+
+    private Set<Transformation<?>> alreadyTransformed = new HashSet<>();
 
     public StreamGraphGenerator(List<Transformation<?>> transformations) {
         this(transformations, DEFAULT_JOB_NAME);
@@ -60,9 +61,24 @@ public class StreamGraphGenerator {
     }
 
     public void transform(Transformation<?> transformation) {
+        if (alreadyTransformed.contains(transformation)) {
+            return;
+        }
+        getParentInputIds(transformation);
         TransformationTranslator<?, Transformation<?>> translator = (TransformationTranslator<?, Transformation<?>>)translatorMap.get(transformation.getClass());
         TransformationTranslator.Context context = new ContextImpl(streamGraph);
         translator.translateForStreaming(transformation, context);
+        alreadyTransformed.add(transformation);
+    }
+
+    /**
+     * 加载父input
+     * @param transformation
+     */
+    private void getParentInputIds(Transformation<?> transformation) {
+        for (Transformation<?> input: transformation.getInputs()) {
+            transform(input);
+        }
     }
 
     private class ContextImpl implements TransformationTranslator.Context {

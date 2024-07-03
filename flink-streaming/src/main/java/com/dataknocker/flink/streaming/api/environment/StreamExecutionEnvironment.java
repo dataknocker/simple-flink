@@ -22,6 +22,7 @@ public class StreamExecutionEnvironment {
 
     public static final String DEFAULT_JOB_NAME = "Flink Streaming Job";
 
+    //只保存有input的transform，其translate时会对parent如source/virtual节点也进行translate
     private List<Transformation<?>> transformations = new ArrayList<>();
 
     private Configuration configuration;
@@ -45,23 +46,20 @@ public class StreamExecutionEnvironment {
     public void execute(StreamGraph streamGraph) {
         JobGraph jobGraph = streamGraph.createJobGraph();
         //TODO 这里先简化，负责启jobmaster，以及把jobvertex发给taskmanager
-        JobMaster jobMaster = JobManagerRunner.startJobManager();
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        JobMaster jobMaster = JobManagerRunner.startJobManager();
+//        try {
+//            Thread.sleep(10000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         Map<Integer, JobVertex> taskVertices = jobGraph.getTaskVertices();
-        taskVertices.forEach((key, value) -> jobMaster.submitTask(key, value.getConfiguration()));
+//        taskVertices.forEach((key, value) -> jobMaster.submitTask(key, value.getConfiguration()));
 
     }
 
     public <T> SourceDataStream<T> addSource(SourceFunction<T> sourceFunction, String sourceName) {
         StreamSource<T, ?> operator = new StreamSource<>(sourceFunction);
-        SourceDataStream<T> sourceDataStream = new SourceDataStream<>(this, operator, sourceName);
-        //TODO 源码中为什么会没有这一步，那source transformation在哪里添加的
-        addOperator(sourceDataStream.getTransformation());
-        return sourceDataStream;
+        return new SourceDataStream<>(this, operator, sourceName);
     }
 
     public <T> SourceDataStream<T> addSource(SourceFunction<T> sourceFunction) {

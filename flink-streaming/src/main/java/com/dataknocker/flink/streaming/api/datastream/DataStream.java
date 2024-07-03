@@ -8,6 +8,9 @@ import com.dataknocker.flink.streaming.api.environment.StreamExecutionEnvironmen
 import com.dataknocker.flink.streaming.api.functions.sink.SinkFunction;
 import com.dataknocker.flink.streaming.api.operators.*;
 import com.dataknocker.flink.streaming.api.transformations.OneInputTransformation;
+import com.dataknocker.flink.streaming.api.transformations.PartitionTransformation;
+import com.dataknocker.flink.streaming.runtime.partitioner.RebalancePartitioner;
+import com.dataknocker.flink.streaming.runtime.partitioner.StreamPartitioner;
 
 /**
  * 数据流操作对象
@@ -52,6 +55,14 @@ public class DataStream<T> {
         SinkDataStream<T> sink = new SinkDataStream(this, new StreamSink<>(sinkFunction));
         environment.addOperator(sink.getTransformation());
         return sink;
+    }
+
+    public DataStream<T> setConnectionType(StreamPartitioner<T> partitioner) {
+        return new DataStream<>(environment, new PartitionTransformation<>(partitioner.toString(), transformation, partitioner));
+    }
+
+    public DataStream<T> rebalance() {
+        return setConnectionType(new RebalancePartitioner<>());
     }
 
     public Transformation<T> getTransformation() {
